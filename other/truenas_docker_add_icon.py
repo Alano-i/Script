@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 功能：修改 TrueNAS 应用的 metadata.yaml 文件中的图标和 Web UI 地址，实现在TrueNAS WEB 页面展示 Docker 应用图标和添加 Web UI 按钮的目的。
+使用方法：
+1、将脚本传到数据集中，添加执行权限，
+2、用root运行：python truenas_docker_add_icon.py
 """
 import os
 import yaml

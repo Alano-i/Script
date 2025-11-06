@@ -1,0 +1,427 @@
+# 说明：只需要改第70和74行即可
+# 基础设置
+mixed-port: 7890
+redir-port: 7892
+tproxy-port: 1536
+allow-lan: true
+mode: Rule
+ipv6: false
+geodata-mode: true
+geodata-loader: standard
+geox-url:
+  geosite: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+  mmdb: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.metadb
+  geoip: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat
+  asn: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb
+geo-auto-update: true
+geo-update-interval: 24
+unified-delay: true
+tcp-concurrent: true
+log-level: info
+find-process-mode: always
+global-client-fingerprint: chrome
+external-controller: 0.0.0.0:9090
+#面板默认 Meta 可选 Yacd / Zash 重启模块即可加载
+external-ui: /data/adb/box_bll/panel/Zash/
+secret: ""
+# pr:
+#  &pr {
+#    type: select,
+#    proxies:
+#      [
+#        香港,
+#        日本,
+#        新加坡,
+#       美国,
+#      ],
+#  }
+# 健康检查
+p: &p
+  type: http
+  interval: 86400
+  health-check:
+    enable: true
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+# —————————
+
+# 订阅地址相关
+A: &A
+  filter: "^(?!.*(套餐|重置|剩余|到期|订阅|群|账户|流量|有效期|时间|官网)).*$"
+  use:
+#  - 1.主要科学地址
+  - 1.自建机场
+
+All: &All
+  type: url-test
+  use:
+# - 1.主要科学地址
+  - 1.自建机场
+  - 2.回家节点
+
+
+proxy-providers: # ← 此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围 ↓
+#  1.主要科学地址:
+#    <<: *p
+#    url: ""
+    
+  1.自建机场:
+    <<: *p
+    url: '改成你自己的'
+  
+  2.回家节点:
+    <<: *p
+    url: '改成你自己的'
+    
+    
+# —————————
+# 嗅探模块
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "Mijia Cloud"
+# —————————
+
+# 网卡模块
+tun:
+  enable: true #true 开 #false 关
+  device: meta
+  stack: gvisor
+  dns-hijack:
+    - any:53
+    - tcp://any:53
+  udp-timeout: 300
+  auto-route: true
+  strict-route: true
+  auto-redirect: false
+  auto-detect-interface: true
+  route-exclude-address:
+#  - 192.168.0.0/16
+  - fc00::/7
+  exclude-package: # 游戏卡顿可添加包名 仅Android
+    #- com.tencent.tmgp.sgame
+# —————————
+
+# DNS模块
+dns:
+  enable: true
+  prefer-h3: true
+  ipv6: true
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.0/15
+  fake-ip-filter:
+    - "*"
+    - "+.lan"
+    - "connect.rom.miui.com"
+    - "localhost.ptlogin2.qq.com"
+    - "+.market.xiaomi.com"
+  direct-nameserver:
+    - 119.29.29.29
+    - 1.12.12.12
+    - 223.5.5.5
+    - 223.6.6.6
+  proxy-server-nameserver:
+    - 119.29.29.29
+    - 1.12.12.12
+    - 223.5.5.5
+    - 223.6.6.6
+# —————————
+
+proxies:
+  - {name: 直连, type: direct, udp: true}
+  - {name: 拒绝连接, type: reject}
+  - {name: DNS_Hijack, type: dns}
+
+
+proxy-groups:
+  - name: 节点选择
+    type: select
+    proxies:
+      - 自动选择
+      - 手动选择
+      - 故障转移
+#      - 🔮 负载均衡
+      - 直连
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Airport.png
+
+
+  - name: 自动选择
+    type: url-test
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Auto.png
+
+
+  - name: 手动选择
+    type: select
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Domestic.png
+     
+  - name: YouTube
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
+
+    
+  - name: Netflix
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
+    
+  - name: Telegram
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
+
+  - name: OpenAI
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
+
+    
+  - name: Home
+    type: url-test
+    use:
+      - 2.回家节点          
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png
+
+
+  - name: 故障转移
+    type: fallback
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
+
+#  - name: 🔮 负载均衡
+#    type: load-balance
+#    strategy: round-robin
+#    <<: *A
+
+  # - name: DNS解析
+  #   type: select
+  #   proxies:
+  #     - 节点选择
+  #   icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png
+
+
+  - name: 广告拦截
+    type: select
+    proxies:
+      - 拒绝连接
+      - 直连
+      - 节点选择
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Advertising.png
+
+  - name: 漏网之鱼
+    type: select
+    proxies:
+      - 直连
+      - 节点选择
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
+
+
+  - { name: 香港节点, 
+      type: select, 
+      <<: *A, 
+      filter: "(?i)(香港|HK|Hong Kong|🇭🇰)",
+      icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    }
+
+  - { name: 日本节点, 
+      type: select, 
+      <<: *A, 
+      filter: "(?i)(日本|JP|Japan|🇯🇵)",
+      icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+    }
+
+  - { name: 新加坡节点, 
+      type: select, 
+      <<: *A, 
+      filter: "(?i)(新加坡|SG|Singapore|🇸🇬)",
+      icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+    }
+
+  - { name: 美国节点, 
+      type: select, 
+      <<: *A, 
+      filter: "(?i)(美国|US|USA|United States|🇺🇸)",
+      icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+    }
+
+
+# —————————
+rules:
+ - DST-PORT,53,DNS_Hijack
+ - IP-CIDR,10.0.0.0/8,Home
+ - RULE-SET,GoogleVoice,美国节点
+ - RULE-SET,Gemini,美国节点
+ - DOMAIN-SUFFIX,telegram.org,Telegram
+ - DOMAIN-KEYWORD,sciencedirect,直连
+ - RULE-SET,PrivateTracker,直连
+ - RULE-SET,applications,直连
+ - RULE-SET,private,直连
+ - RULE-SET,reject,广告拦截
+ - RULE-SET,icloud,直连
+ - RULE-SET,apple,直连
+ - RULE-SET,google,手动选择
+ - RULE-SET,YouTube,YouTube
+ - RULE-SET,Netflix,Netflix
+ - RULE-SET,OpenAI,OpenAI
+ - RULE-SET,proxy,手动选择
+ - RULE-SET,115,直连
+ - RULE-SET,direct,直连
+ - RULE-SET,lancidr,直连
+ - RULE-SET,cncidr,直连
+ - RULE-SET,telegramcidr,Telegram
+ - GEOIP,LAN,直连
+ - DOMAIN-SUFFIX,cn,直连
+ - DOMAIN-KEYWORD,-cn,直连
+ - GEOIP,CN,直连
+ - MATCH,漏网之鱼
+
+rule-providers:
+  PrivateTracker:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrivateTracker/PrivateTracker.yaml
+    path: ./ruleset/PrivateTracker.yaml
+    interval: 86400
+  Netflix:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Netflix/Netflix.yaml
+    path: ./ruleset/Netflix.yaml
+    interval: 86400
+  OpenAI:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
+    path: ./ruleset/OpenAI.yaml
+    interval: 86400
+  115:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/115/115.yaml
+    interval: 86400
+  YouTube:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
+    path: ./ruleset/YouTube.yaml
+    interval: 86400
+  reject:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
+    path: ./ruleset/reject.yaml
+    interval: 86400
+  icloud:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt
+    path: ./ruleset/icloud.yaml
+    interval: 86400
+  apple:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt
+    path: ./ruleset/apple.yaml
+    interval: 86400
+  google:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt
+    path: ./ruleset/google.yaml
+    interval: 86400
+  proxy:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
+    path: ./ruleset/proxy.yaml
+    interval: 86400
+  direct:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
+    path: ./ruleset/direct.yaml
+    interval: 86400
+  private:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    path: ./ruleset/private.yaml
+    interval: 86400
+  gfw:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt
+    path: ./ruleset/gfw.yaml
+    interval: 86400
+  greatfire:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/greatfire.txt
+    path: ./ruleset/greatfire.yaml
+    interval: 86400
+  tld-not-cn:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/tld-not-cn.txt
+    path: ./ruleset/tld-not-cn.yaml
+    interval: 86400
+  GoogleVoice:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/GoogleVoice/GoogleVoice.yaml
+    path: ./ruleset/GoogleVoice.yaml
+    interval: 86400
+  Gemini:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Gemini/Gemini.yaml
+    path: ./ruleset/Gemini.yaml
+    interval: 86400    
+  telegramcidr:
+    type: http
+    behavior: ipcidr
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/telegramcidr.txt
+    path: ./ruleset/telegramcidr.yaml
+    interval: 86400
+  cncidr:
+    type: http
+    behavior: ipcidr
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    path: ./ruleset/cncidr.yaml
+    interval: 86400
+  lancidr:
+    type: http
+    behavior: ipcidr
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
+    path: ./ruleset/lancidr.yaml
+    interval: 86400
+  applications:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt
+    path: ./ruleset/applications.yaml
+    interval: 86400

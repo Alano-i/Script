@@ -1,5 +1,5 @@
-# 说明：只需要改第70和74行即可
-# 基础设置
+# 说明：只需要修改第56和60行（proxy-providers部分）
+########################################## 基础设置 ##########################################
 mixed-port: 7890
 redir-port: 7892
 tproxy-port: 1536
@@ -21,21 +21,12 @@ log-level: info
 find-process-mode: always
 global-client-fingerprint: chrome
 external-controller: 0.0.0.0:9090
-#面板默认 Meta 可选 Yacd / Zash 重启模块即可加载
+# 面板默认 Meta 可选 Yacd / Zash 重启模块即可加载
 external-ui: /data/adb/box_bll/panel/Zash/
 secret: ""
-# pr:
-#  &pr {
-#    type: select,
-#    proxies:
-#      [
-#        香港,
-#        日本,
-#        新加坡,
-#       美国,
-#      ],
-#  }
-# 健康检查
+
+
+########################################## 健康检查 ##########################################
 p: &p
   type: http
   interval: 86400
@@ -43,39 +34,33 @@ p: &p
     enable: true
     url: https://www.gstatic.com/generate_204
     interval: 300
-# —————————
 
-# 订阅地址相关
+
+########################################## 订阅地址相关 ##########################################
 A: &A
   filter: "^(?!.*(套餐|重置|剩余|到期|订阅|群|账户|流量|有效期|时间|官网)).*$"
   use:
-#  - 1.主要科学地址
   - 1.自建机场
+
 
 All: &All
   type: url-test
   use:
-# - 1.主要科学地址
   - 1.自建机场
   - 2.回家节点
 
 
-proxy-providers: # ← 此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围 ↓
-#  1.主要科学地址:
-#    <<: *p
-#    url: ""
-    
+proxy-providers:  #  此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围   
   1.自建机场:
     <<: *p
-    url: '改成你自己的'
+    url: https://xxxx.com/2cXayx1w/download/dby
   
   2.回家节点:
     <<: *p
-    url: '改成你自己的'
+    url: https://xxxx.com/2cXayx1w/download/backhome
     
     
-# —————————
-# 嗅探模块
+########################################## 嗅探模块 ##########################################
 sniffer:
   enable: true
   force-dns-mapping: true
@@ -92,11 +77,11 @@ sniffer:
     - "+.v2ex.com"
   skip-domain:
     - "Mijia Cloud"
-# —————————
 
-# 网卡模块
+
+########################################## 网卡模块 ##########################################
 tun:
-  enable: true #true 开 #false 关
+  enable: true
   device: meta
   stack: gvisor
   dns-hijack:
@@ -108,13 +93,12 @@ tun:
   auto-redirect: false
   auto-detect-interface: true
   route-exclude-address:
-#  - 192.168.0.0/16
+  # - 192.168.0.0/16
   - fc00::/7
   exclude-package: # 游戏卡顿可添加包名 仅Android
     #- com.tencent.tmgp.sgame
-# —————————
 
-# DNS模块
+########################################## DNS模块 ##########################################
 dns:
   enable: true
   prefer-h3: true
@@ -138,7 +122,7 @@ dns:
     - 1.12.12.12
     - 223.5.5.5
     - 223.6.6.6
-# —————————
+
 
 proxies:
   - {name: 直连, type: direct, udp: true}
@@ -153,7 +137,7 @@ proxy-groups:
       - 自动选择
       - 手动选择
       - 故障转移
-#      - 🔮 负载均衡
+      # - 负载均衡
       - 直连
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Airport.png
@@ -169,6 +153,15 @@ proxy-groups:
     type: select
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Domestic.png
+
+
+  - name: Google
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Google_Search.png
+    
      
   - name: YouTube
     type: select
@@ -176,6 +169,24 @@ proxy-groups:
       - 节点选择
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
+
+
+  - name: Apple
+    type: select
+    proxies:
+      - 直连
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+
+
+  - name: iCloud
+    type: select
+    proxies:
+      - 直连
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/iCloud.png
 
     
   - name: Netflix
@@ -199,7 +210,16 @@ proxy-groups:
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
 
-    
+
+  - name: Gemini
+    type: select
+    proxies:
+      - 节点选择
+    <<: *A
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/AI.png
+
+
+
   - name: Home
     type: url-test
     use:
@@ -212,10 +232,11 @@ proxy-groups:
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
 
-#  - name: 🔮 负载均衡
-#    type: load-balance
-#    strategy: round-robin
-#    <<: *A
+
+  # - name: 负载均衡
+  #   type: load-balance
+  #   strategy: round-robin
+  #   <<: *A
 
   # - name: DNS解析
   #   type: select
@@ -231,6 +252,7 @@ proxy-groups:
       - 直连
       - 节点选择
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Advertising.png
+
 
   - name: 漏网之鱼
     type: select
@@ -269,25 +291,25 @@ proxy-groups:
     }
 
 
-# —————————
+########################################## 代理规则 ##########################################
 rules:
  - DST-PORT,53,DNS_Hijack
  - IP-CIDR,10.0.0.0/8,Home
- - RULE-SET,GoogleVoice,美国节点
- - RULE-SET,Gemini,美国节点
+ - RULE-SET,Gemini,Gemini
  - DOMAIN-SUFFIX,telegram.org,Telegram
  - DOMAIN-KEYWORD,sciencedirect,直连
  - RULE-SET,PrivateTracker,直连
  - RULE-SET,applications,直连
  - RULE-SET,private,直连
  - RULE-SET,reject,广告拦截
- - RULE-SET,icloud,直连
- - RULE-SET,apple,直连
- - RULE-SET,google,手动选择
+ - RULE-SET,icloud,iCloud
+ - RULE-SET,apple,Apple
+ - RULE-SET,google,Google
+ - RULE-SET,GoogleVoice,Google
  - RULE-SET,YouTube,YouTube
  - RULE-SET,Netflix,Netflix
  - RULE-SET,OpenAI,OpenAI
- - RULE-SET,proxy,手动选择
+ - RULE-SET,proxy,节点选择
  - RULE-SET,115,直连
  - RULE-SET,direct,直连
  - RULE-SET,lancidr,直连
@@ -299,6 +321,8 @@ rules:
  - GEOIP,CN,直连
  - MATCH,漏网之鱼
 
+
+########################################## 外部规则集 ##########################################
 rule-providers:
   PrivateTracker:
     type: http

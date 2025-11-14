@@ -139,6 +139,10 @@ proxy-groups:
       - 故障转移
       # - 负载均衡
       - 直连
+      - 美国节点
+      - 香港节点
+      - 日本节点
+      - 新加坡节点
     <<: *A
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Airport.png
 

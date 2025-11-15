@@ -54,6 +54,6 @@ systemctl restart smartdns
 
 echo
 echo "============================="
-echo "   ✅ SmartDNS 安装并启动完成   "
+echo "  ✅ SmartDNS 安装并启动完成   "
 echo "============================="
 echo

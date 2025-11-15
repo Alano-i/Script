@@ -52,4 +52,8 @@ echo "5/5 设置开机启动并启动 SmartDNS..."
 systemctl enable smartdns
 systemctl restart smartdns
 
-echo "✅ SmartDNS 安装并启动完成。"
+echo
+echo "============================="
+echo "   ✅ SmartDNS 安装并启动完成   "
+echo "============================="
+echo

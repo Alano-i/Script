@@ -24,7 +24,7 @@ domain-rules /example.com/ -address 1.2.3.4
 EOF
 
 # 下载国内外域名列表
-echo "4/5 写入 SmartDNS 默认配置..."
+echo "4/5 下载海外域名列表..."
 CONF_DIR="/etc/smartdns/domain-set"
 OVERSEA_CONF="${CONF_DIR}/oversea_domainlist.conf"
 DOMESTIC_CONF="${CONF_DIR}/domestic_domainlist.conf"
@@ -38,6 +38,7 @@ error_exit() {
 }
 
 # 下载新配置文件
+mkdir -p "${CONF_DIR}" || error_exit "无法创建目录 ${CONF_DIR}"
 echo "开始下载海外域名列表..."
 curl -sSf "${OVERSEA_URL}" -o "${OVERSEA_CONF}" || error_exit "下载海外域名列表失败"
 

@@ -26,6 +26,7 @@ EOF
 # 下载国内外域名列表
 echo "4/5 下载海外域名列表..."
 CONF_DIR="/etc/smartdns/domain-set"
+LOG_DIR="/etc/smartdns/log"
 OVERSEA_CONF="${CONF_DIR}/oversea_domainlist.conf"
 DOMESTIC_CONF="${CONF_DIR}/domestic_domainlist.conf"
 OVERSEA_URL="https://raw.githubusercontent.com/WPF0414/GFWList2AGH/refs/heads/main/gfwlist2smartdns/blacklist_full.conf"
@@ -39,6 +40,7 @@ error_exit() {
 
 # 下载新配置文件
 mkdir -p "${CONF_DIR}" || error_exit "无法创建目录 ${CONF_DIR}"
+mkdir -p "${LOG_DIR}" || error_exit "无法创建目录 ${LOG_DIR}"
 echo "开始下载海外域名列表..."
 curl -sSf "${OVERSEA_URL}" -o "${OVERSEA_CONF}" || error_exit "下载海外域名列表失败"
 

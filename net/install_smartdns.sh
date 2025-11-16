@@ -62,7 +62,7 @@ mkdir -p "${LOG_DIR}" || error_exit "无法创建目录 ${LOG_DIR}"
 
 # 判断配置文件是否已存在
 if [ -f "${MAIN_CONF}" ]; then
-    echo -e "\033[33m检测到 mihomo 配置文件 ${MAIN_CONF} 已存在，是否覆盖？\033[0m"
+    echo -e "\033[33m检测到 smartdns 配置文件 ${MAIN_CONF} 已存在，是否覆盖？\033[0m"
     echo "1) 覆盖"
     echo "2) 不覆盖"
     read -p "请输入选项 (1 或 2): " cover_choice

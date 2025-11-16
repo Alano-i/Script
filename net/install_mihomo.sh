@@ -156,6 +156,8 @@ echo "  版本：$LATEST_TAG"
 echo "-----------------------------------------"
 echo "查看状态： systemctl status mihomo"
 echo "查看日志： journalctl -u mihomo -o cat -f"
+echo -e "\033[33m⚠️  请修改 ${MAIN_CONF} 文件中标注有《需要修改》字样的行，其他的按需修改  ⚠️\033[0m"
+
 echo "========================================="
 echo
 

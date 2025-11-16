@@ -167,13 +167,13 @@ dns:
     - "time.*.com"
     - "GEOSITE,CN"
   default-nameserver:
-    - 61.139.2.69    # 运营商DNS
-    - 218.6.200.139   # 运营商DNS
+    - 61.139.2.69    # 运营商DNS，需要修改
+    - 218.6.200.139   # 运营商DNS，需要修改
     # - "运营商v6 DNS"
     # - "运营商v6 DNS"
   nameserver:
-    - 61.139.2.69    # 运营商DNS
-    - 218.6.200.139   # 运营商DNS
+    - 61.139.2.69    # 运营商DNS，需要修改
+    - 218.6.200.139   # 运营商DNS，需要修改
     # - "运营商v6 DNS"
     # - "运营商v6 DNS"
   fallback:
@@ -194,15 +194,15 @@ dns:
       - '+.facebook.com'
       - '+.youtube.com'
   proxy-server-nameserver:
-    - 61.139.2.69    # 运营商DNS
-    - 218.6.200.139   # 运营商DNS
+    - 61.139.2.69    # 运营商DNS，需要修改
+    - 218.6.200.139   # 运营商DNS，需要修改
     # - "运营商v6 DNS"
     # - "运营商v6 DNS"
 #redirhost模式下用
   nameserver-policy:
     "geosite:cn,private":
-    - 61.139.2.69    # 运营商DNS
-    - 218.6.200.139   # 运营商DNS
+    - 61.139.2.69    # 运营商DNS，需要修改
+    - 218.6.200.139   # 运营商DNS，需要修改
     # - "运营商v6 DNS"
     # - "运营商v6 DNS"
     "geosite:!cn,!private": 

@@ -56,11 +56,32 @@ error_exit() {
 }
 
 # 下载新配置文件
+
 mkdir -p "${DOMAINLIST_CONF_DIR}" || error_exit "无法创建目录 ${DOMAINLIST_CONF_DIR}"
 mkdir -p "${LOG_DIR}" || error_exit "无法创建目录 ${LOG_DIR}"
 
-# 根据用户选择下载对应的配置文件
-curl -sSf "${SMARTDNS_URL}" -o "${MAIN_CONF}" || error_exit "下载 SmartDNS 配置文件失败"
+# 判断配置文件是否已存在
+if [ -f "${MAIN_CONF}" ]; then
+    echo -e "\033[33m检测到 mihomo 配置文件 ${MAIN_CONF} 已存在，是否覆盖？\033[0m"
+    echo "1) 覆盖"
+    echo "2) 不覆盖"
+    read -p "请输入选项 (1 或 2): " cover_choice
+    case $cover_choice in
+        1)
+            echo "正在覆盖配置文件..."
+            curl -sSf "${SMARTDNS_URL}" -o "${MAIN_CONF}" || error_exit "下载 SmartDNS 配置文件失败"
+            ;;
+        2)
+            echo "已选择不覆盖，跳过下载配置文件。"
+            ;;
+        *)
+            echo "ERROR: 无效的选项，请输入 1 或 2"
+            exit 1
+            ;;
+    esac
+else
+    curl -sSf "${SMARTDNS_URL}" -o "${MAIN_CONF}" || error_exit "下载 SmartDNS 配置文件失败"
+fi
 
 
 echo "开始下载海外域名列表..."

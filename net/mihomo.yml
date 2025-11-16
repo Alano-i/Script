@@ -1,22 +1,14 @@
 # 注意规则在满足自己需求情况下，尽量做到精简，不要过度复杂，以免影响性能。
 
 # 订阅基础配置[每天更新一次订阅节点，每300s一次健康检查]
-NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 300}}
+NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: "https://www.apple.com/library/test/success.html", interval: 300}}
 #机场订阅
 proxy-providers:
-  AirPort1:
-    url: "https://yourairport.url"
-    <<: *NodeParam
-    proxy: 🎯 直连
-
-  AirPort2:
-    url: "https://yourairport.url"
-    <<: *NodeParam
-    proxy: 🎯 直连
+  sub-store: {url: "http://", <<: *NodeParam, proxy: "🎯 直连"}  # 机场或sub-store链接，需要修改
 
 # 节点信息
-proxies:
-#  自建节点加在这
+#proxies:
+#  - {name: 直连, type: direct, udp: true}
 
 #- name: wghome # 可以自定义节点名称
 #  type: wireguard
@@ -55,7 +47,7 @@ proxies:
 mode: rule
 port: 8080
 socks-port: 1080
-mixed-port: 6153
+mixed-port: 7890
 redir-port: 7891
 tproxy-port: 7892
 allow-lan: true
@@ -117,6 +109,7 @@ sniffer:
     - "dlg.io.mi.com"
     - "+.cloudflare.com"
     - "+.taobao.com"
+    - "+.wfkids.+"
     - "+.oray.com"
     - "+.oray.net"
     - "+.orayer.com"
@@ -139,8 +132,12 @@ tun:
 #  gso: true
 #  gso-max-size: 65536
   route-exclude-address:
+    - 127.0.0.0/8
     - 10.0.0.0/8
+    - 18.0.0.0/8
+    - 10.252.0.0/24
     - fd00::/7
+    - fd11::/7
     - fe80::/7
 
 # DNS模块
@@ -155,8 +152,7 @@ dns:
   # 路由器个人建议使用 redir-host 以最佳兼容性
   # 其他设备可以使用 fake-ip
   enhanced-mode: fake-ip
-  # fake-ip-range: 28.0.0.1/8
-  fake-ip-range: 198.18.0.0/16
+  fake-ip-range: 28.0.0.1/8
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - "*"
@@ -167,20 +163,20 @@ dns:
     - "time.*.com"
     - "GEOSITE,CN"
   default-nameserver:
-    - 61.139.2.69    # 运营商DNS，需要修改
-    - 218.6.200.139   # 运营商DNS，需要修改
-    # - "运营商v6 DNS"
-    # - "运营商v6 DNS"
+    - 61.139.2.69      # 运营商DNS，需要修改
+    - 218.6.200.139    # 运营商DNS，需要修改
+    # - "[240e:4e:800::66]"
+    # - "[240e:4e::66]"
   nameserver:
-    - 61.139.2.69    # 运营商DNS，需要修改
-    - 218.6.200.139   # 运营商DNS，需要修改
-    # - "运营商v6 DNS"
-    # - "运营商v6 DNS"
+    - 61.139.2.69      # 运营商DNS，需要修改
+    - 218.6.200.139    # 运营商DNS，需要修改
+    # - "[240e:4e:800::66]"
+    # - "[240e:4e::66]"
   fallback:
     - "https://doh.dns.sb/dns-query#🌎 DNS"
     - "https://dns.cloudflare.com/dns-query#🌎 DNS"
     - "https://dns.twnic.tw/dns-query#🌎 DNS"
-    - "tls://8.8.4.4#🌎 DNS"
+    - "tls://8.8.8.8#🌎 DNS"
     - "tls://1.1.1.1#🌎 DNS"
     - "https://1.1.1.1/dns-query#🌎 DNS"
     - "https://8.8.8.8/dns-query#🌎 DNS"
@@ -195,19 +191,19 @@ dns:
       - '+.youtube.com'
   proxy-server-nameserver:
     - 61.139.2.69    # 运营商DNS，需要修改
-    - 218.6.200.139   # 运营商DNS，需要修改
-    # - "运营商v6 DNS"
-    # - "运营商v6 DNS"
+    - 218.6.200.139  # 运营商DNS，需要修改
+    # - "[240e:4e:800::66]"
+    # - "[240e:4e::66]"
 #redirhost模式下用
   nameserver-policy:
     "geosite:cn,private":
-    - 61.139.2.69    # 运营商DNS，需要修改
-    - 218.6.200.139   # 运营商DNS，需要修改
-    # - "运营商v6 DNS"
-    # - "运营商v6 DNS"
+      - 61.139.2.69    # 运营商DNS，需要修改
+      - 218.6.200.139  # 运营商DNS，需要修改
+      # - "[240e:4e:800::66]"
+      # - "[240e:4e::66]"
     "geosite:!cn,!private": 
-      - "tls://1.0.0.1#🌎 DNS"
       - "tls://8.8.8.8#🌎 DNS"
+      - "tls://1.1.1.1#🌎 DNS"
       - "tls://dns.google#🌎 DNS"
       - "tls://cloudflare-dns.com#🌎 DNS"
  
@@ -215,50 +211,61 @@ dns:
 # 注意锚点必须放在引用的上方，可以集中把锚点全部放yaml的顶部。
 pr: &pr {type: fallback, proxies: [🚀 默认代理, 🔯 日本故转, 🔯 香港故转, ♻️ 日本自动, ♻️ 香港自动, ♻️ 美国自动, ♻️ 自动选择, 🇯🇵 日本节点, 🇭🇰 香港节点, 🇺🇲 美国节点, 🌐 全部节点, 🎯 直连]}
 proxy-groups:
-  - {name: 🚀 默认代理, type: fallback, proxies: [🔯 日本故转, 🔯 香港故转, ♻️ 日本自动, ♻️ 香港自动, ♻️ 美国自动, ♻️ 自动选择, 🇯🇵 日本节点, 🇭🇰 香港节点, 🇺🇲 美国节点, 🌐 全部节点, 🎯 直连]}
-  - {name: 🔯 日本故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$" }
-  - {name: 🔯 香港故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
-  - {name: ♻️ 日本自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$" }
-  - {name: ♻️ 香港自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
-  - {name: ♻️ 美国自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新)).)*$"}
-  - {name: ♻️ 自动选择, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "^((?!(直连)).)*$"}
-  - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?i)日|jp|japan"}
-  - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?i)港|hk|hongkong|hong kong"}
-  - {name: 🇺🇲 美国节点, type: select, include-all: true, filter: "(?i)美|us|unitedstates|united states"}
-  - {name: 🌐 全部节点, type: select, include-all: true}
-  - {name: 🎯 直连, type: select, proxies: [DIRECT]}
-  - {name: 🚫 拦截, type: select, proxies: [REJECT, DIRECT, 🚀 默认代理] }
-  - {name: 🍎 Apple, type: select, proxies: [DIRECT, 🚀 默认代理]}
-  - {name: 📹 YouTube, <<: *pr}
-  - {name: 🍀 Google, <<: *pr}
-  - {name: 🤖 ChatGPT, <<: *pr}
-  - {name: 👨🏿‍💻 GitHub, <<: *pr}
-  - {name: 🐬 OneDrive, <<: *pr}
-  - {name: 🪟 Microsoft, <<: *pr}
-  - {name: 🎵 TikTok, <<: *pr}
-  - {name: 📲 Telegram, <<: *pr}
-  - {name: 🎥 NETFLIX, <<: *pr}
-  - {name: ✈️ Speedtest, <<: *pr}
-  - {name: 💶 PayPal, <<: *pr}
-  - {name: 🌎 DNS, <<: *pr}
-  - {name: 🐟 漏网之鱼, <<: *pr}
+  - {name: "🚀 默认代理", type: fallback, proxies: [🔯 日本故转, 🔯 香港故转, ♻️ 日本自动, ♻️ 香港自动, ♻️ 美国自动, ♻️ 自动选择, 🇯🇵 日本节点, 🇭🇰 香港节点, 🇺🇲 美国节点, 🌐 全部节点, 🎯 直连]}
+  - {name: "🔯 日本故转", type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美|尼)).)*$" }
+  - {name: "🔯 香港故转", type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|尼)).)*$"}
+  - {name: "♻️ 日本自动", type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美|尼)).)*$" }
+  - {name: "♻️ 香港自动", type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|尼)).)*$"}
+  - {name: "♻️ 美国自动", type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新|尼)).)*$"}
+  - {name: "♻️ 自动选择", type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?i)^(?!.*(?:直连|自动|剩余|重置|到期|刷新|官网|试用|ink)).*$"}
+  - {name: "🇯🇵 日本节点", type: select, include-all: true, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美|尼)).)*$" }
+  - {name: "🇭🇰 香港节点", type: select, include-all: true, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|尼)).)*$"}
+  - {name: "🇺🇲 美国节点", type: select, include-all: true, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新|尼)).)*$"}
+  - {name: "🌐 全部节点", type: select, include-all: true, filter: "(?i)^(?!.*(?:直连|自动|剩余|重置|到期|刷新|官网|试用|ink)).*$"}
+  - {name: "🍿 日本刮削", type: fallback, use: [sub-store], filter: "JP-ISIF|JP-CLAW", url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 20}
+  - {name: "🎯 直连", type: select, proxies: ["DIRECT"]}
+  - {name: "🚫 拦截", type: select, proxies: ["REJECT", "DIRECT", "🚀 默认代理"]}
+  - {name: "🍎 Apple", type: select, proxies: ["DIRECT", "🚀 默认代理"]}
+  - {name: "📹 YouTube", <<: *pr}
+  - {name: "🍀 Google", <<: *pr}
+  - {name: "🤖 ChatGPT", <<: *pr}
+  - {name: "👨🏿‍💻 GitHub", <<: *pr}
+  - {name: "🐬 OneDrive", <<: *pr}
+  - {name: "🪟 Microsoft", <<: *pr}
+  - {name: "🎵 TikTok", <<: *pr}
+  - {name: "📲 Telegram", <<: *pr}
+  - {name: "🎥 NETFLIX", <<: *pr}
+  - {name: "✈️ Speedtest", <<: *pr}
+  - {name: "💶 PayPal", <<: *pr}
+  - {name: "🌎 DNS", <<: *pr}
+  - {name: "🐟 漏网之鱼", <<: *pr}
 rules:
+#  - DOMAIN-KEYWORD,services.googleapis,节点选择
+#  - DOMAIN-KEYWORD,xn--ngstr-lra8j.com,节点选择
+#  - DST-PORT,5555,🎯 直连
   - GEOIP,private,🎯 直连,no-resolve
   - GEOSITE,private,🎯 直连
   - GEOSITE,google-gemini,🍀 Google
   - GEOSITE,category-dev,🚀 默认代理
+  - RULE-SET,115,🎯 直连
+  - RULE-SET,PrivateTracker,🚀 默认代理
+  - RULE-SET,AWAvenue-Ads,🚫 拦截
   - DOMAIN-SUFFIX,iprofiles.apple.com,🚫 拦截
   - DOMAIN-SUFFIX,mdmenrollment.apple.com,🚫 拦截
   - DOMAIN-SUFFIX,deviceenrollment.apple.com,🚫 拦截
   - DOMAIN-SUFFIX,gdmf.apple.com,🚫 拦截
   - DOMAIN-SUFFIX,albert.apple.com,🚫 拦截
   - DOMAIN-SUFFIX,adobe.io,🚫 拦截
+  - DOMAIN-SUFFIX,adobestats.io,🚫 拦截
+  - DOMAIN-SUFFIX,adobelogin.com,🚫 拦截
+  - DOMAIN-SUFFIX,adobeccstatic.com,🚫 拦截
   - DOMAIN-KEYWORD,tracker,🎯 直连
+  - DOMAIN-KEYWORD,piggo.me,🎯 直连
   - DOMAIN-KEYWORD,javdb,🔯 香港故转
   - DOMAIN-KEYWORD,amazon,🔯 日本故转
   - DOMAIN-KEYWORD,sukebei,🔯 日本故转
   - DOMAIN-KEYWORD,javbus,🔯 日本故转
-  - DOMAIN-SUFFIX,dmm.co.jp,🔯 日本故转
+  - DOMAIN-SUFFIX,dmm.co.jp,🍿 日本刮削
   - DOMAIN-SUFFIX,avbase.net,🔯 日本故转
   - DOMAIN-SUFFIX,airav.io,🔯 日本故转
   - DOMAIN-SUFFIX,7mmtv.sx,🔯 日本故转
@@ -281,7 +288,6 @@ rules:
   - DOMAIN-SUFFIX,yesjav.info,🔯 日本故转
   - DOMAIN-SUFFIX,prestige-av.com,🔯 日本故转
   - DOMAIN-KEYWORD,sehuatang,🔯 日本故转
-  - RULE-SET,PrivateTracker,🚀 默认代理
 # 哪吒监控
   - DOMAIN-SUFFIX,ip.sb,🎯 直连
   - DOMAIN-SUFFIX,ip-api,🎯 直连
@@ -303,10 +309,9 @@ rules:
   # 防止 YouTube 等使用 QUIC 导致速度不佳, 禁用 443 端口 UDP 流量（不包括国内）
 # - AND,(AND,(DST-PORT,443),(NETWORK,UDP)),(NOT,((GEOSITE,cn))),🚫 拦截
 # - AND,(AND,(DST-PORT,443),(NETWORK,UDP)),(NOT,((GEOIP,CN))),🚫 拦截
-  - RULE-SET,AWAvenue-Ads,🚫 拦截
 # - GEOSITE,biliintl,哔哩东南亚
 # - GEOSITE,bilibili,哔哩哔哩
-  - GEOSITE,category-ai-!cn,🤖 ChatGPT
+  - GEOSITE,category-scholar-!cn,🤖 ChatGPT
   - GEOSITE,apple,🍎 Apple
   - GEOSITE,apple-cn,🍎 Apple
 #  - GEOSITE,ehentai,ehentai
@@ -344,6 +349,9 @@ rules:
 
 # 规则订阅
 rule-providers:
+  # 秋风广告拦截规则
+  # https://awavenue.top
+  # 由于 Anti-AD 误杀率高，本项目已在 1.11-241024 版本更换秋风广告规则
   AWAvenue-Ads:
     type: http
     behavior: domain
@@ -359,4 +367,12 @@ rule-providers:
     # path可为空(仅限clash.meta 1.15.0以上版本)
     path: ./rule_provider/PrivateTracker.yaml
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrivateTracker/PrivateTracker.yaml"
+    interval: 600
+  115:
+    type: http
+    behavior: classical
+    format: yaml
+    # path可为空(仅限clash.meta 1.15.0以上版本)
+    path: ./rule_provider/115.yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/115/115.yaml"
     interval: 600

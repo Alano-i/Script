@@ -1,0 +1,362 @@
+# 注意规则在满足自己需求情况下，尽量做到精简，不要过度复杂，以免影响性能。
+
+# 订阅基础配置[每天更新一次订阅节点，每300s一次健康检查]
+NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: "https://www.gstatic.com/generate_204", interval: 300}}
+#机场订阅
+proxy-providers:
+  AirPort1:
+    url: "https://yourairport.url"
+    <<: *NodeParam
+    proxy: 🎯 直连
+
+  AirPort2:
+    url: "https://yourairport.url"
+    <<: *NodeParam
+    proxy: 🎯 直连
+
+# 节点信息
+proxies:
+#  自建节点加在这
+
+#- name: wghome # 可以自定义节点名称
+#  type: wireguard
+#  server: wg.xxxxxxxx.xxx  # 可自定义优选 EndPoint IP，与下方端口相对应
+#  port: 51888   # 可自定义优选 EndPoint IP，与上方 IP 相对应
+#  ip: 10.8.0.2/24
+#  public-key: Bitu67IKski78HzCDOXt3Q7yHesARI13b9j6/un0i+Eo0k=
+#  private-key: MNuEdiRNJ7J4tl9kwUh8651CvCtYmozL5lhscQJGVw=  # 获取 warp 的 私钥
+#  pre-shared-key: 9seHuFG9nfk1ND0T3cKWxYXIRwBt9ICRVAIRhDNxF1g=
+#  udp: true
+
+#- name: sshhome
+#  type: ssh
+#  server: ssh.xxxxxxxxxx.xxx
+#  port: 22
+#  username: root
+#  password: ""
+
+  # - name: "WARP"
+  #   type: wireguard
+  #   server: engage.cloudflareclient.com
+  #   port: 2408
+  #   ip: "172.16.0.2/32"
+  #   ipv6: "2606::1/128"        # 自行替换
+  #   private-key: "private-key" # 自行替换
+  #   public-key: "public-key"   # 自行替换
+  #   udp: true
+  #   reserved: "abba"           # 自行替换
+  #   mtu: 1280
+  #   dialer-proxy: "WARP前置"
+  #   remote-dns-resolve: true
+  #   dns:
+  #     - https://dns.cloudflare.com/dns-query
+
+# 全局配置 
+mode: rule
+port: 8080
+socks-port: 1080
+mixed-port: 6153
+redir-port: 7891
+tproxy-port: 7892
+allow-lan: true
+bind-address: "*"
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
+log-level: warning
+find-process-mode: strict
+# interface-name: en0
+global-client-fingerprint: chrome
+keep-alive-idle: 600
+keep-alive-interval: 15
+disable-keep-alive: false
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# 控制面板
+external-controller: 0.0.0.0:9090
+secret: "123456"
+external-ui: "ui"
+external-ui-name: zashboard
+external-ui-url: "https://ghfast.top/https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+
+geodata-mode: true
+geodata-loader: standard
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  geoip: "https://ghfast.top/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat"
+  geosite: "https://ghfast.top/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://ghfast.top/https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb"
+  asn: "https://ghfast.top/https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+
+# 嗅探
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "+.push.apple.com" #推送通知
+    - "Mijia Cloud"  #米家智能设备
+    - "Xiaomi Cloud"
+    - "+.baidu.com"
+    - "+.apple.com"
+    - "+.icloud.com"
+    - "dlg.io.mi.com"
+    - "+.cloudflare.com"
+    - "+.taobao.com"
+    - "+.oray.com"
+    - "+.oray.net"
+    - "+.orayer.com"
+    - "+.github.com"  # 跳过 GitHub
+    - "+.microsoft.com"  # 跳过 Microsoft
+    - "+.zhenyunpan.com"  # 跳过 clouddrive2
+
+# 入站
+tun:
+  enable: true
+  # system/gvisor/mixed
+  stack: system
+  dns-hijack: ["any:53", "tcp://any:53"]
+  auto-route: true   # 配置路由表
+  auto-redirect: true # 自动重定向TCP连接
+  auto-detect-interface: true  # 自动识别出口网卡
+  device: "utun0"
+  strict-route: true
+  mtu: 1400
+#  gso: true
+#  gso-max-size: 65536
+  route-exclude-address:
+    - 10.0.0.0/8
+    - fd00::/7
+    - fe80::/7
+
+# DNS模块
+dns:
+  enable: true
+  cache-algorithm: arc
+  prefer-h3: true
+  listen: 0.0.0.0:53
+  ipv6: true
+  use-hosts: true
+  respect-rules: true
+  # 路由器个人建议使用 redir-host 以最佳兼容性
+  # 其他设备可以使用 fake-ip
+  enhanced-mode: fake-ip
+  # fake-ip-range: 28.0.0.1/8
+  fake-ip-range: 198.18.0.0/16
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "*"
+    - "+.lan"
+    - "+.local"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "time.*.com"
+    - "GEOSITE,CN"
+  default-nameserver:
+    - 61.139.2.69    # 运营商DNS
+    - 218.6.200.139   # 运营商DNS
+    # - "运营商v6 DNS"
+    # - "运营商v6 DNS"
+  nameserver:
+    - 61.139.2.69    # 运营商DNS
+    - 218.6.200.139   # 运营商DNS
+    # - "运营商v6 DNS"
+    # - "运营商v6 DNS"
+  fallback:
+    - "https://doh.dns.sb/dns-query#🌎 DNS"
+    - "https://dns.cloudflare.com/dns-query#🌎 DNS"
+    - "https://dns.twnic.tw/dns-query#🌎 DNS"
+    - "tls://8.8.4.4#🌎 DNS"
+    - "tls://1.1.1.1#🌎 DNS"
+    - "https://1.1.1.1/dns-query#🌎 DNS"
+    - "https://8.8.8.8/dns-query#🌎 DNS"
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
+  proxy-server-nameserver:
+    - 61.139.2.69    # 运营商DNS
+    - 218.6.200.139   # 运营商DNS
+    # - "运营商v6 DNS"
+    # - "运营商v6 DNS"
+#redirhost模式下用
+  nameserver-policy:
+    "geosite:cn,private":
+    - 61.139.2.69    # 运营商DNS
+    - 218.6.200.139   # 运营商DNS
+    # - "运营商v6 DNS"
+    # - "运营商v6 DNS"
+    "geosite:!cn,!private": 
+      - "tls://1.0.0.1#🌎 DNS"
+      - "tls://8.8.8.8#🌎 DNS"
+      - "tls://dns.google#🌎 DNS"
+      - "tls://cloudflare-dns.com#🌎 DNS"
+ 
+# 出站策略
+# 注意锚点必须放在引用的上方，可以集中把锚点全部放yaml的顶部。
+pr: &pr {type: fallback, proxies: [🚀 默认代理, 🔯 日本故转, 🔯 香港故转, ♻️ 日本自动, ♻️ 香港自动, ♻️ 美国自动, ♻️ 自动选择, 🇯🇵 日本节点, 🇭🇰 香港节点, 🇺🇲 美国节点, 🌐 全部节点, 🎯 直连]}
+proxy-groups:
+  - {name: 🚀 默认代理, type: fallback, proxies: [🔯 日本故转, 🔯 香港故转, ♻️ 日本自动, ♻️ 香港自动, ♻️ 美国自动, ♻️ 自动选择, 🇯🇵 日本节点, 🇭🇰 香港节点, 🇺🇲 美国节点, 🌐 全部节点, 🎯 直连]}
+  - {name: 🔯 日本故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$" }
+  - {name: 🔯 香港故转, type: fallback, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
+  - {name: ♻️ 日本自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$" }
+  - {name: ♻️ 香港自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
+  - {name: ♻️ 美国自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新)).)*$"}
+  - {name: ♻️ 自动选择, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "^((?!(直连)).)*$"}
+  - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?i)日|jp|japan"}
+  - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?i)港|hk|hongkong|hong kong"}
+  - {name: 🇺🇲 美国节点, type: select, include-all: true, filter: "(?i)美|us|unitedstates|united states"}
+  - {name: 🌐 全部节点, type: select, include-all: true}
+  - {name: 🎯 直连, type: select, proxies: [DIRECT]}
+  - {name: 🚫 拦截, type: select, proxies: [REJECT, DIRECT, 🚀 默认代理] }
+  - {name: 🍎 Apple, type: select, proxies: [DIRECT, 🚀 默认代理]}
+  - {name: 📹 YouTube, <<: *pr}
+  - {name: 🍀 Google, <<: *pr}
+  - {name: 🤖 ChatGPT, <<: *pr}
+  - {name: 👨🏿‍💻 GitHub, <<: *pr}
+  - {name: 🐬 OneDrive, <<: *pr}
+  - {name: 🪟 Microsoft, <<: *pr}
+  - {name: 🎵 TikTok, <<: *pr}
+  - {name: 📲 Telegram, <<: *pr}
+  - {name: 🎥 NETFLIX, <<: *pr}
+  - {name: ✈️ Speedtest, <<: *pr}
+  - {name: 💶 PayPal, <<: *pr}
+  - {name: 🌎 DNS, <<: *pr}
+  - {name: 🐟 漏网之鱼, <<: *pr}
+rules:
+  - GEOIP,private,🎯 直连,no-resolve
+  - GEOSITE,private,🎯 直连
+  - GEOSITE,google-gemini,🍀 Google
+  - GEOSITE,category-dev,🚀 默认代理
+  - DOMAIN-SUFFIX,iprofiles.apple.com,🚫 拦截
+  - DOMAIN-SUFFIX,mdmenrollment.apple.com,🚫 拦截
+  - DOMAIN-SUFFIX,deviceenrollment.apple.com,🚫 拦截
+  - DOMAIN-SUFFIX,gdmf.apple.com,🚫 拦截
+  - DOMAIN-SUFFIX,albert.apple.com,🚫 拦截
+  - DOMAIN-SUFFIX,adobe.io,🚫 拦截
+  - DOMAIN-KEYWORD,tracker,🎯 直连
+  - DOMAIN-KEYWORD,javdb,🔯 香港故转
+  - DOMAIN-KEYWORD,amazon,🔯 日本故转
+  - DOMAIN-KEYWORD,sukebei,🔯 日本故转
+  - DOMAIN-KEYWORD,javbus,🔯 日本故转
+  - DOMAIN-SUFFIX,dmm.co.jp,🔯 日本故转
+  - DOMAIN-SUFFIX,avbase.net,🔯 日本故转
+  - DOMAIN-SUFFIX,airav.io,🔯 日本故转
+  - DOMAIN-SUFFIX,7mmtv.sx,🔯 日本故转
+  - DOMAIN-SUFFIX,madou.club,🔯 日本故转
+  - DOMAIN-SUFFIX,jav321.com,🔯 日本故转
+  - DOMAIN-SUFFIX,fc2hub.com,🔯 日本故转
+  - DOMAIN-SUFFIX,javbus.com,🔯 日本故转
+  - DOMAIN-SUFFIX,madouqu.com,🔯 日本故转
+  - DOMAIN-SUFFIX,mgstage.com,🔯 日本故转
+  - DOMAIN-SUFFIX,fc2ppvdb.com,🔯 日本故转
+  - DOMAIN-SUFFIX,theporndb.net,🔯 日本故转
+  - DOMAIN-SUFFIX,freejavbt.com,🔯 日本故转
+  - DOMAIN-SUFFIX,javlibrary.com,🔯 日本故转
+  - DOMAIN-SUFFIX,paycalling.com,🔯 日本故转
+  - DOMAIN-SUFFIX,dmm.co.jp,🔯 日本故转
+  - DOMAIN-SUFFIX,mdpjzip.xyz,🔯 日本故转
+  - DOMAIN-SUFFIX,hscangku.net,🔯 日本故转
+  - DOMAIN-SUFFIX,cableav.tv,🔯 日本故转
+  - DOMAIN-SUFFIX,love6.tv,🔯 日本故转
+  - DOMAIN-SUFFIX,yesjav.info,🔯 日本故转
+  - DOMAIN-SUFFIX,prestige-av.com,🔯 日本故转
+  - DOMAIN-KEYWORD,sehuatang,🔯 日本故转
+  - RULE-SET,PrivateTracker,🚀 默认代理
+# 哪吒监控
+  - DOMAIN-SUFFIX,ip.sb,🎯 直连
+  - DOMAIN-SUFFIX,ip-api,🎯 直连
+  - DOMAIN-SUFFIX,ipapi.co,🎯 直连
+  - DOMAIN-SUFFIX,ipinfo.io,🎯 直连
+  - DOMAIN-SUFFIX,myip.com,🎯 直连
+  - DOMAIN-SUFFIX,blog.cloudflare.com,🎯 直连
+  - DOMAIN-SUFFIX,developers.cloudflare.com,🎯 直连
+  - DOMAIN-SUFFIX,hostinger.com,🎯 直连
+  - DOMAIN-SUFFIX,ahrefs.com,🎯 直连
+#FUCK WPS
+  - DST-PORT,6881,🚫 拦截
+  - DOMAIN-REGEX,^[a-zA-Z0-9-]{1,63}-ad-[a-zA-Z0-9-]{1,63}\.byteimg\.com$,🚫 拦截
+  - DOMAIN-REGEX,^[a-zA-Z0-9-]{1,63}-be-pack-sign\.pglstatp-toutiao\.com$,🚫 拦截
+  - DOMAIN-REGEX,^[a-zA-Z0-9-]{1,63}-normal\.zijieapi\.com$,🚫 拦截
+  - DOMAIN-REGEX,^[a-zA-Z0-9-]{1,63}-normal-[a-zA-Z0-9-]{1,63}\.zijieapi\.com$,🚫 拦截
+
+  # 若需禁用 QUIC 请取消注释 QUIC 两条规则
+  # 防止 YouTube 等使用 QUIC 导致速度不佳, 禁用 443 端口 UDP 流量（不包括国内）
+# - AND,(AND,(DST-PORT,443),(NETWORK,UDP)),(NOT,((GEOSITE,cn))),🚫 拦截
+# - AND,(AND,(DST-PORT,443),(NETWORK,UDP)),(NOT,((GEOIP,CN))),🚫 拦截
+  - RULE-SET,AWAvenue-Ads,🚫 拦截
+# - GEOSITE,biliintl,哔哩东南亚
+# - GEOSITE,bilibili,哔哩哔哩
+  - GEOSITE,category-ai-!cn,🤖 ChatGPT
+  - GEOSITE,apple,🍎 Apple
+  - GEOSITE,apple-cn,🍎 Apple
+#  - GEOSITE,ehentai,ehentai
+  - GEOSITE,github,👨🏿‍💻 GitHub
+#  - GEOSITE,twitter,Twitter
+  - GEOSITE,youtube,📹 YouTube
+  - GEOSITE,google,🍀 Google
+  - GEOSITE,google-cn,🍀 Google # Google CN 不走代理会导致香港等地区节点 Play Store 异常
+  - GEOSITE,telegram,📲 Telegram
+  - GEOSITE,netflix,🎥 NETFLIX
+  - GEOSITE,tiktok,🎵 TikTok
+  - GEOSITE,paypal,♻️ 美国自动
+#  - GEOSITE,bahamut,巴哈姆特
+#  - GEOSITE,spotify,Spotify
+#  - GEOSITE,pixiv,Pixiv
+  - GEOSITE,steam@cn,🎯 直连
+#  - GEOSITE,steam,Steam
+  - GEOSITE,onedrive,🐬 OneDrive
+  - GEOSITE,microsoft,🪟 Microsoft
+  - GEOSITE,geolocation-!cn,🐟 漏网之鱼
+  - GEOIP,google,🍀 Google
+  - GEOIP,netflix,🎥 NETFLIX
+  - GEOIP,telegram,📲 Telegram
+#  - GEOIP,twitter,Twitter
+  - GEOSITE,CN,🎯 直连
+  - GEOIP,CN,🎯 直连
+  # 绕过局域网地址
+  - IP-CIDR,10.0.0.0/8,🎯 直连
+  - IP-CIDR,172.16.0.0/12,🎯 直连
+  - IP-CIDR,192.168.0.0/16,🎯 直连
+  - IP-CIDR,100.64.0.0/10,🎯 直连
+  - IP-CIDR,127.0.0.0/8,🎯 直连
+  - GEOSITE,gfw,🚀 默认代理
+  - MATCH,🐟 漏网之鱼
+
+# 规则订阅
+rule-providers:
+  AWAvenue-Ads:
+    type: http
+    behavior: domain
+    format: yaml
+    # path可为空(仅限clash.meta 1.15.0以上版本)
+    path: ./rule_provider/AWAvenue-Ads.yaml
+    url: "https://ghfast.top/https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/refs/heads/main/Filters/AWAvenue-Ads-Rule-Clash-Classical.yaml"
+    interval: 600
+  PrivateTracker:
+    type: http
+    behavior: classical
+    format: yaml
+    # path可为空(仅限clash.meta 1.15.0以上版本)
+    path: ./rule_provider/PrivateTracker.yaml
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrivateTracker/PrivateTracker.yaml"
+    interval: 600

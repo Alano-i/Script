@@ -4,10 +4,12 @@
 NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: "https://www.apple.com/library/test/success.html", interval: 300}}
 #机场订阅
 proxy-providers:
-  sub-store: {url: "http://", <<: *NodeParam, proxy: "🎯 直连"}  # 机场或sub-store链接，需要修改
+  AirPort1: {url: "http://", <<: *NodeParam, proxy: "🎯 直连"}   # 机场或sub-store链接，需要修改
+  AirPort2: {url: "http://", <<: *NodeParam, proxy: "🎯 直连"}   # 机场或sub-store链接，需要修改
 
 # 节点信息
 #proxies:
+#  自建节点加在这
 #  - {name: 直连, type: direct, udp: true}
 
 #- name: wghome # 可以自定义节点名称
@@ -68,7 +70,7 @@ profile:
 
 # 控制面板
 external-controller: 0.0.0.0:9090
-secret: "123456"
+secret: "123456"    # 密码自行修改 
 external-ui: "ui"
 external-ui-name: zashboard
 external-ui-url: "https://ghfast.top/https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
@@ -163,15 +165,15 @@ dns:
     - "time.*.com"
     - "GEOSITE,CN"
   default-nameserver:
-    - 61.139.2.69      # 运营商DNS，需要修改
-    - 218.6.200.139    # 运营商DNS，需要修改
-    # - "[240e:4e:800::66]"
-    # - "[240e:4e::66]"
+    - 223.5.5.5              # 建议修改成运营商DNS
+    - 114.114.114.114        # 建议修改成运营商DNS
+    #- "[2400:3200::1]"       # 建议修改成运营商DNS
+    #- "[2402:4e00::]"        # 建议修改成运营商DNS
   nameserver:
-    - 61.139.2.69      # 运营商DNS，需要修改
-    - 218.6.200.139    # 运营商DNS，需要修改
-    # - "[240e:4e:800::66]"
-    # - "[240e:4e::66]"
+    - 223.5.5.5              # 建议修改成运营商DNS
+    - 114.114.114.114        # 建议修改成运营商DNS
+    #- "[2400:3200::1]"       # 建议修改成运营商DNS
+    #- "[2402:4e00::]"        # 建议修改成运营商DNS
   fallback:
     - "https://doh.dns.sb/dns-query#🌎 DNS"
     - "https://dns.cloudflare.com/dns-query#🌎 DNS"
@@ -190,17 +192,17 @@ dns:
       - '+.facebook.com'
       - '+.youtube.com'
   proxy-server-nameserver:
-    - 61.139.2.69    # 运营商DNS，需要修改
-    - 218.6.200.139  # 运营商DNS，需要修改
-    # - "[240e:4e:800::66]"
-    # - "[240e:4e::66]"
+    - 223.5.5.5              # 建议修改成运营商DNS
+    - 114.114.114.114        # 建议修改成运营商DNS
+    #- "[2400:3200::1]"       # 建议修改成运营商DNS
+    #- "[2402:4e00::]"        # 建议修改成运营商DNS
 #redirhost模式下用
   nameserver-policy:
     "geosite:cn,private":
-      - 61.139.2.69    # 运营商DNS，需要修改
-      - 218.6.200.139  # 运营商DNS，需要修改
-      # - "[240e:4e:800::66]"
-      # - "[240e:4e::66]"
+    - 223.5.5.5              # 建议修改成运营商DNS
+    - 114.114.114.114        # 建议修改成运营商DNS
+    #- "[2400:3200::1]"       # 建议修改成运营商DNS
+    #- "[2402:4e00::]"        # 建议修改成运营商DNS
     "geosite:!cn,!private": 
       - "tls://8.8.8.8#🌎 DNS"
       - "tls://1.1.1.1#🌎 DNS"

@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------
-# 一键安装 mihomo（二进制方式）脚本
-# Usage: 将你下载好的 mihomo 二进制文件解压（例如 mihomoxxxx）放在当前目录，
-#        然后执行本脚本：./install_mihomo.sh
-# 注意：须以 root 身份运行
+# 一键安装 mihomo（二进制自动下载最新版本）
+# 自动识别系统架构，自动下载 GitHub Releases 最新版本
 # ----------------------------------------------------------
 
 set -e
 
-BINARY_SRC=""
 BIN_DEST="/usr/local/bin/mihomo"
 CONFIG_DIR="/etc/mihomo"
 SERVICE_FILE="/etc/systemd/system/mihomo.service"
@@ -16,10 +13,12 @@ SERVICE_FILE="/etc/systemd/system/mihomo.service"
 MAIN_CONF="${CONFIG_DIR}/config.yaml"
 CONF_URL="https://raw.githubusercontent.com/Alano-i/Script/refs/heads/main/net/mihomo.yml"
 
-echo
-echo "=============== 安装 Mihomo ==============="
+GITHUB_REPO="MetaCubeX/mihomo"
+DOWNLOAD_DIR="/tmp/mihomo_download"
 
-# 错误处理函数
+echo
+echo "=============== 自动安装 Mihomo ==============="
+
 error_exit() {
     echo "ERROR: $1"
     exit 1
@@ -27,73 +26,105 @@ error_exit() {
 
 # 检查 root
 if [ "$(id -u)" -ne 0 ]; then
-  echo "错误：请以 root 用户身份运行此脚本"
+  echo "❌ 请以 root 用户运行"
   exit 1
 fi
 
-# 查找你下载的二进制文件（以 “mihomo” 开头但不是已经命名为 mihomo）
-for f in ./mihomo*; do
-  if [ -f "$f" ] && [ "$f" != "./mihomo" ]; then
-    BINARY_SRC="$f"
-    break
-  fi
-done
+# ================================
+# ① 检测系统架构
+# ================================
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64)
+        ARCH_KEYWORD="linux-amd64"
+        ;;
+    aarch64|arm64)
+        ARCH_KEYWORD="linux-arm64"
+        ;;
+    *)
+        error_exit "不支持的架构: $ARCH（仅支持 amd64 / arm64）"
+        ;;
+esac
 
-if [ -z "$BINARY_SRC" ]; then
-  echo "未找到下载的 mihomo 二进制文件（例如 mihomo-linux-amd64-v3-v1.19.16）"
-  echo "请从以下链接下载并解压放在和脚本同目录 (注意命名需要以 mihomo 开头)"
-  echo
-  echo -e "\033[33mMihomo下载地址：https://wiki.metacubex.one/startup/#__tabbed_2_2\033[0m"
-  echo
-  exit 1
+echo "检测到系统架构：$ARCH → 使用构建：$ARCH_KEYWORD"
+
+# ================================
+# ② 获取 GitHub 最新版本号
+# ================================
+echo "获取 GitHub 最新版本中…"
+
+LATEST_TAG=$(curl -sSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep tag_name | cut -d '"' -f 4)
+
+if [ -z "$LATEST_TAG" ]; then
+    error_exit "无法从 GitHub 获取最新版本"
 fi
 
-echo "找到二进制文件：$BINARY_SRC"
-echo "复制到 $BIN_DEST …"
+echo "最新版本：$LATEST_TAG"
 
-# 检查 mihomo 进程是否在运行，如果在运行则先停止
-if pgrep -x "mihomo" > /dev/null; then
-    echo -e "\033[33m检测到 mihomo 进程正在运行，正在停止...\033[0m"
-    systemctl stop mihomo.service
-    sleep 1
-    echo "mihomo 已停止"
+# ================================
+# ③ 下载对应架构的二进制包
+# ================================
+mkdir -p "$DOWNLOAD_DIR"
+cd "$DOWNLOAD_DIR"
+
+ASSET_NAME="mihomo-${ARCH_KEYWORD}-v3-${LATEST_TAG}.gz"
+DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/download/${LATEST_TAG}/${ASSET_NAME}"
+
+echo "下载文件：$ASSET_NAME"
+echo "下载地址：$DOWNLOAD_URL"
+
+curl -L -o "$ASSET_NAME" "$DOWNLOAD_URL" || error_exit "下载失败"
+
+echo "解压中…"
+gunzip -f "$ASSET_NAME"
+
+BINARY_SRC="${ASSET_NAME%.gz}"
+
+if [ ! -f "$BINARY_SRC" ]; then
+    error_exit "解压失败：未找到解压后的二进制文件"
+fi
+
+chmod +x "$BINARY_SRC"
+echo "成功下载并解压 mihomo → $BINARY_SRC"
+
+# ================================
+# ④ 覆盖旧版
+# ================================
+echo "安装到 $BIN_DEST …"
+
+if pgrep -x "mihomo" >/dev/null; then
+    echo "检测到运行中的 mihomo → 停止"
+    systemctl stop mihomo || true
 fi
 
 cp "$BINARY_SRC" "$BIN_DEST"
 chmod +x "$BIN_DEST"
 
-# 创建配置目录
-if [ ! -d "$CONFIG_DIR" ]; then
-  echo "创建配置目录 $CONFIG_DIR"
-  mkdir -p "$CONFIG_DIR"
-fi
+# ================================
+# ⑤ 配置文件处理
+# ================================
+mkdir -p "$CONFIG_DIR"
 
-echo "开始配下 Mihomo 载置文件..."
-# 判断配置文件是否已存在
-if [ -f "${MAIN_CONF}" ]; then
-    echo -e "\033[33m检测到 mihomo 配置文件 ${MAIN_CONF} 已存在，是否覆盖？\033[0m"
+if [ -f "$MAIN_CONF" ]; then
+    echo "检测到已有配置文件 ${MAIN_CONF}"
     echo "1) 覆盖"
     echo "2) 不覆盖"
-    read -p "请输入选项 (1 或 2): " cover_choice
-    case $cover_choice in
-        1)
-            echo "正在覆盖配置文件..."
-            curl -sSf "${CONF_URL}" -o "${MAIN_CONF}" || error_exit "下载 Mihomo 配置文件失败"
-            ;;
-        2)
-            echo "已选择不覆盖，跳过下载配置文件。"
-            ;;
-        *)
-            echo "ERROR: 无效的选项，请输入 1 或 2"
-            exit 1
-            ;;
-    esac
+    read -p "选择 (1/2): " choice
+    if [ "$choice" = "1" ]; then
+        curl -sSf "$CONF_URL" -o "$MAIN_CONF" || error_exit "下载配置失败"
+        echo "已覆盖配置文件"
+    else
+        echo "跳过覆盖配置文件"
+    fi
 else
-    curl -sSf "${CONF_URL}" -o "${MAIN_CONF}" || error_exit "下载 Mihomo 配置文件失败"
+    curl -sSf "$CONF_URL" -o "$MAIN_CONF" || error_exit "下载配置失败"
 fi
 
-# 创建 systemd 服务文件
-echo "创建 systemd 服务文件：$SERVICE_FILE"
+# ================================
+# ⑥ 写入 systemd
+# ================================
+echo "写入 systemd 文件：$SERVICE_FILE"
+
 cat > "$SERVICE_FILE" << EOF
 [Unit]
 Description=mihomo Daemon, Another Clash Kernel.
@@ -114,21 +145,18 @@ ExecReload=/bin/kill -HUP \$MAINPID
 WantedBy=multi-user.target
 EOF
 
-# 重新加载 systemd，启用并启动服务
-echo "重新加载 systemd …"
 systemctl daemon-reload
-
-echo "启用服务：mihomo"
-systemctl enable mihomo.service
-
-echo "启动服务：mihomo"
-systemctl start mihomo.service
+systemctl enable mihomo
+systemctl restart mihomo
 
 echo
 echo "========================================="
-echo "✅ Mihomo 安装完成"
-echo "查看服务状态： systemctl status mihomo"
+echo "  ✅ Mihomo 已成功安装并启动！"
+echo "  版本：$LATEST_TAG"
+echo "-----------------------------------------"
+echo "查看状态： systemctl status mihomo"
 echo "查看日志： journalctl -u mihomo -o cat -f"
 echo "========================================="
 echo
+
 exit 0

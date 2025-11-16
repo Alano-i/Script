@@ -17,7 +17,7 @@ MAIN_CONF="${CONFIG_DIR}/config.yaml"
 CONF_URL="https://raw.githubusercontent.com/Alano-i/Script/refs/heads/main/net/mihomo.yml"
 
 echo
-echo "=============== 安装 Mihomo =================="
+echo "=============== 安装 Mihomo ==============="
 
 # 错误处理函数
 error_exit() {

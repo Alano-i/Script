@@ -124,12 +124,12 @@ fi
 # ⑥ UI 资源下载
 # ================================
 UI_DIR="/etc/mihomo/ui"
-META_DIR="$UI_DIR/meta"
-ZASH_DIR="$UI_DIR/zash"
+META_DIR="$UI_DIR/metacubexd"
+ZASH_DIR="$UI_DIR/zashboard"
 
 DOWNLOAD_URLS=(
-  "meta|https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
-  "zash|https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+  "metacubexd|https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
+  "zashboard|https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
 )
 
 # ----------------------------
@@ -227,10 +227,6 @@ for entry in "${DOWNLOAD_URLS[@]}"; do
                 mv "$TMPDIR_ZASH/"* "$TARGET/"
             fi
             rm -rf "$TMPDIR_ZASH"
-            # 如果目录存在则删除
-            if [ -d "$UI_DIR/zashboard" ]; then
-                rm -rf "$UI_DIR/zashboard"
-            fi
             rm -f "$TMP_FILE"
 
             echo "✅ [zash] 解压完成：$TARGET"
@@ -271,9 +267,6 @@ systemctl restart mihomo
 
 if [ -d "$DOWNLOAD_DIR" ]; then
     rm -rf "$DOWNLOAD_DIR"
-fi
-if [ -d "$UI_DIR/zashboard" ]; then
-    rm -rf "$UI_DIR/zashboard"
 fi
 
 echo

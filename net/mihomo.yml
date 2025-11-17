@@ -224,7 +224,7 @@ proxy-groups:
   - {name: "🇭🇰 香港节点", type: select, include-all: true, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美|尼)).)*$"}
   - {name: "🇺🇲 美国节点", type: select, include-all: true, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新|尼)).)*$"}
   - {name: "🌐 全部节点", type: select, include-all: true, filter: "(?i)^(?!.*(?:直连|自动|剩余|重置|到期|刷新|官网|试用|ink)).*$"}
-  - {name: "🍿 日本刮削", type: fallback, use: [sub-store], filter: "JP-ISIF|JP-CLAW", url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 20}
+  - {name: "🍿 日本刮削", type: fallback, use: [AirPort1], filter: "JP-ISIF|JP-CLAW", url: "http://www.gstatic.com/generate_204", interval: 300, tolerance: 20}
   - {name: "🎯 直连", type: select, proxies: ["DIRECT"]}
   - {name: "🚫 拦截", type: select, proxies: ["REJECT", "DIRECT", "🚀 默认代理"]}
   - {name: "🍎 Apple", type: select, proxies: ["DIRECT", "🚀 默认代理"]}

@@ -180,7 +180,7 @@ for tool in "${TOOLS[@]}"; do
     install_if_needed "$tool"
 done
 
-echo "🌐 开始下载 UI 资源..."
+echo "开始下载 UI 资源..."
 
 mkdir -p "$UI_DIR"
 

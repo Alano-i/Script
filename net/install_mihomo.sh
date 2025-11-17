@@ -196,7 +196,7 @@ for entry in "${DOWNLOAD_URLS[@]}"; do
     echo "下载完成：$TMP_FILE"
 
     case "$KEY" in
-        meta)
+        metacubexd)
             TARGET="$META_DIR"
             echo "清理旧目录：$TARGET"
             rm -rf "$TARGET"
@@ -208,7 +208,7 @@ for entry in "${DOWNLOAD_URLS[@]}"; do
             rm -f "$TMP_FILE"
 
         ;;
-        zash)
+        zashboard)
             TARGET="$ZASH_DIR"
             echo "清理旧目录：$TARGET"
             rm -rf "$TARGET"

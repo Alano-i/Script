@@ -121,6 +121,126 @@ else
 fi
 
 # ================================
+# ⑥ UI 资源下载
+# ================================
+UI_DIR="/etc/mihomo/ui"
+META_DIR="$UI_DIR/meta"
+ZASH_DIR="$UI_DIR/zash"
+
+DOWNLOAD_URLS=(
+  "meta|https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
+  "zash|https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+)
+
+# ----------------------------
+# 工具函数
+# ----------------------------
+# 要检查的命令列表
+TOOLS=("unzip" "curl")
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+install_if_needed() {
+    local cmd=$1
+    local pkg=${2:-$cmd}  # 包名默认为命令名
+
+    if command_exists "$cmd"; then
+        return 0
+    fi
+
+    echo "⚠ 未检测到 $cmd，正在尝试自动安装..."
+
+    [ "$(id -u)" -ne 0 ] && SUDO=sudo || SUDO=""
+
+    if command_exists apt-get; then
+        $SUDO apt-get update && $SUDO apt-get install -y "$pkg"
+    elif command_exists yum; then
+        $SUDO yum install -y "$pkg"
+    elif command_exists dnf; then
+        $SUDO dnf install -y "$pkg"
+    elif command_exists apk; then
+        $SUDO apk add --no-cache "$pkg"
+    elif command_exists pacman; then
+        $SUDO pacman -Sy --noconfirm "$pkg"
+    elif command_exists zypper; then
+        $SUDO zypper --non-interactive install "$pkg"
+    else
+        echo "❌ 无法自动安装 $cmd，请手动安装后重试"
+        exit 1
+    fi
+
+    if ! command_exists "$cmd"; then
+        echo "❌ $cmd 安装失败，请手动安装后重试"
+        exit 1
+    fi
+}
+# 循环检查安装
+for tool in "${TOOLS[@]}"; do
+    install_if_needed "$tool"
+done
+
+echo "🌐 开始下载 UI 资源..."
+
+mkdir -p "$UI_DIR"
+
+for entry in "${DOWNLOAD_URLS[@]}"; do
+    KEY="${entry%%|*}"
+    URL="${entry#*|}"
+
+    echo "➡ [$KEY] 下载：$URL"
+
+    TMP_FILE="/tmp/${KEY}_ui.tmp"
+    curl -L --progress-bar -o "$TMP_FILE" "$URL"
+
+    echo "下载完成：$TMP_FILE"
+
+    case "$KEY" in
+        meta)
+            TARGET="$META_DIR"
+            echo "清理旧目录：$TARGET"
+            rm -rf "$TARGET"
+            mkdir -p "$TARGET"
+
+            echo "解压 meta 到：$TARGET"
+            tar -xzf "$TMP_FILE" -C "$TARGET"
+            echo "✅ [meta] 解压完成：$TARGET"
+            rm -f "$TMP_FILE"
+
+        ;;
+        zash)
+            TARGET="$ZASH_DIR"
+            echo "清理旧目录：$TARGET"
+            rm -rf "$TARGET"
+            mkdir -p "$TARGET"
+
+            TMPDIR_ZASH="/tmp/zash_unzip"
+            rm -rf "$TMPDIR_ZASH"
+            mkdir -p "$TMPDIR_ZASH"
+
+            unzip -q "$TMP_FILE" -d "$TMPDIR_ZASH"
+
+            # 检测 dist 顶级目录
+            if [ -d "$TMPDIR_ZASH/dist" ]; then
+                mv "$TMPDIR_ZASH/dist/"* "$TARGET/"
+            else
+                mv "$TMPDIR_ZASH/"* "$TARGET/"
+            fi
+            rm -rf "$TMPDIR_ZASH"
+            # 如果目录存在则删除
+            if [ -d "$UI_DIR/zashboard" ]; then
+                rm -rf "$UI_DIR/zashboard"
+            fi
+            rm -f "$TMP_FILE"
+
+            echo "✅ [zash] 解压完成：$TARGET"
+        ;;
+    esac
+done
+
+echo "✅ WEB UI 全部安装完成"
+
+# ================================
 # ⑥ 写入 systemd
 # ================================
 echo "写入 systemd 文件：$SERVICE_FILE"
@@ -148,6 +268,13 @@ EOF
 systemctl daemon-reload
 systemctl enable mihomo
 systemctl restart mihomo
+
+if [ -d "$DOWNLOAD_DIR" ]; then
+    rm -rf "$DOWNLOAD_DIR"
+fi
+if [ -d "$UI_DIR/zashboard" ]; then
+    rm -rf "$UI_DIR/zashboard"
+fi
 
 echo
 echo "========================================="

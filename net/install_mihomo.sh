@@ -101,7 +101,7 @@ cp "$BINARY_SRC" "$BIN_DEST"
 chmod +x "$BIN_DEST"
 
 # ================================
-# ⑤ 配置文件处理
+# ⑤ 创建配置文件处理
 # ================================
 mkdir -p "$CONFIG_DIR"
 
@@ -119,18 +119,6 @@ if [ -f "$MAIN_CONF" ]; then
 else
     curl -sSf "$CONF_URL" -o "$MAIN_CONF" || error_exit "下载配置失败"
 fi
-
-# ================================
-# ⑥ UI 资源下载
-# ================================
-UI_DIR="/etc/mihomo/ui"
-META_DIR="$UI_DIR/metacubexd"
-ZASH_DIR="$UI_DIR/zashboard"
-
-DOWNLOAD_URLS=(
-  "metacubexd|https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
-  "zashboard|https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
-)
 
 # ----------------------------
 # 工具函数
@@ -180,64 +168,102 @@ for tool in "${TOOLS[@]}"; do
     install_if_needed "$tool"
 done
 
-echo "开始下载 UI 资源..."
+# ================================
+# ⑥ UI 资源下载
+# ================================
+UI_DIR="/etc/mihomo/ui"
 
-mkdir -p "$UI_DIR"
+# 下载列表：支持新增条目（格式：KEY|URL）
+DOWNLOAD_URLS=(
+  "metacubexd|https://github.com/MetaCubeX/metacubexd/releases/latest/download/compressed-dist.tgz"
+  "zashboard|https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+  # 新增示例："newui|https://example.com/newui-dist.tar.gz"
+)
+
+# 识别压缩格式（根据URL后缀）
+get_compress_type() {
+  local url="$1"
+  if [[ "$url" =~ \.tar\.gz$|\.tgz$ ]]; then
+    echo "tar.gz"
+  elif [[ "$url" =~ \.zip$ ]]; then
+    echo "zip"
+  else
+    echo "unknown"
+  fi
+}
+
+echo "开始下载 UI 资源..."
+mkdir -p "$UI_DIR" || { echo "❌ 创建UI根目录失败：$UI_DIR"; exit 1; }
 
 for entry in "${DOWNLOAD_URLS[@]}"; do
-    KEY="${entry%%|*}"
-    URL="${entry#*|}"
+  # 分割 KEY 和 URL（兼容URL中含|的极端情况，此处按第一个|分割）
+  KEY="${entry%%|*}"
+  URL="${entry#*|}"
+  TARGET_DIR="$UI_DIR/$KEY"  # 自动生成目标目录
+  TMP_FILE="/tmp/${KEY}_ui.tmp"
 
-    echo "➡ [$KEY] 下载：$URL"
+  echo -e "\n➡ [$KEY] 下载：$URL"
+  
+  # 下载文件
+  if ! curl -L --progress-bar -o "$TMP_FILE" "$URL"; then
+    echo "❌ [$KEY] 下载失败：$URL"
+    rm -f "$TMP_FILE"
+    continue
+  fi
+  echo "[$KEY] 下载完成：$TMP_FILE"
 
-    TMP_FILE="/tmp/${KEY}_ui.tmp"
-    curl -L --progress-bar -o "$TMP_FILE" "$URL"
+  # 清理旧目录
+  echo "[$KEY] 清理旧目录：$TARGET_DIR"
+  rm -rf "$TARGET_DIR"
+  mkdir -p "$TARGET_DIR" || { echo "❌ 创建目标目录失败：$TARGET_DIR"; rm -f "$TMP_FILE"; continue; }
 
-    echo "下载完成：$TMP_FILE"
+  # 识别压缩格式并解压
+  COMPRESS_TYPE=$(get_compress_type "$URL")
+  case "$COMPRESS_TYPE" in
+    tar.gz)
+      echo "[$KEY] 解压到：$TARGET_DIR"
+      if tar -xzf "$TMP_FILE" -C "$TARGET_DIR" >/dev/null 2>&1; then
+        echo "✅ [$KEY] 解压完成：$TARGET_DIR"
+      else
+        echo "❌ [$KEY] 解压失败（tar.gz格式）"
+      fi
+      rm -f "$TMP_FILE"
+      ;;
 
-    case "$KEY" in
-        metacubexd)
-            TARGET="$META_DIR"
-            echo "清理旧目录：$TARGET"
-            rm -rf "$TARGET"
-            mkdir -p "$TARGET"
+    zip)
+      TMP_UNZIP_DIR="/tmp/${KEY}_unzip"
+      rm -rf "$TMP_UNZIP_DIR"
+      mkdir -p "$TMP_UNZIP_DIR"
 
-            echo "解压 meta 到：$TARGET"
-            tar -xzf "$TMP_FILE" -C "$TARGET"
-            echo "✅ [meta] 解压完成：$TARGET"
-            rm -f "$TMP_FILE"
+      echo "[$KEY] 解压到临时目录：$TMP_UNZIP_DIR"
+      if unzip -q "$TMP_FILE" -d "$TMP_UNZIP_DIR" >/dev/null 2>&1; then
+        # 兼容 zip 包是否包含 dist 顶级目录
+        if [ -d "$TMP_UNZIP_DIR/dist" ]; then
+          mv "$TMP_UNZIP_DIR/dist/"* "$TARGET_DIR/"
+        else
+          mv "$TMP_UNZIP_DIR/"* "$TARGET_DIR/"
+        fi
+        echo "✅ [$KEY] 解压完成：$TARGET_DIR"
+      else
+        echo "❌ [$KEY] 解压失败（zip格式）"
+      fi
 
-        ;;
-        zashboard)
-            TARGET="$ZASH_DIR"
-            echo "清理旧目录：$TARGET"
-            rm -rf "$TARGET"
-            mkdir -p "$TARGET"
+      # 清理临时文件
+      rm -rf "$TMP_UNZIP_DIR"
+      rm -f "$TMP_FILE"
+      ;;
 
-            TMPDIR_ZASH="/tmp/zash_unzip"
-            rm -rf "$TMPDIR_ZASH"
-            mkdir -p "$TMPDIR_ZASH"
-
-            unzip -q "$TMP_FILE" -d "$TMPDIR_ZASH"
-
-            # 检测 dist 顶级目录
-            if [ -d "$TMPDIR_ZASH/dist" ]; then
-                mv "$TMPDIR_ZASH/dist/"* "$TARGET/"
-            else
-                mv "$TMPDIR_ZASH/"* "$TARGET/"
-            fi
-            rm -rf "$TMPDIR_ZASH"
-            rm -f "$TMP_FILE"
-
-            echo "✅ [zash] 解压完成：$TARGET"
-        ;;
-    esac
+    unknown)
+      echo "❌ [$KEY] 不支持的压缩格式：$URL"
+      rm -f "$TMP_FILE"
+      ;;
+  esac
 done
 
-echo "✅ WEB UI 全部安装完成"
+echo -e "\n✅ WEB UI 全部安装完成\n"
 
 # ================================
-# ⑥ 写入 systemd
+# ⑦ 写入 systemd
 # ================================
 echo "写入 systemd 文件：$SERVICE_FILE"
 

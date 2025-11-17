@@ -1,4 +1,4 @@
-# 说明：只需要修改（proxy-providers部分）
+# 说明：只需要修改（proxy-providers部分和运营商DNS）
 ########################################## 全局设置 ##########################################
 mode: Rule
 port: 8080
@@ -50,22 +50,28 @@ proxy-test: &proxy-test
 all-proxys: &all-proxys
   filter: "^(?!.*(套餐|重置|剩余|到期|订阅|群|账户|流量|有效期|时间|官网)).*$"
   use:
-    - 1.自建机场
+    - 自建
+    - 机场1
 
 All: &All
   type: url-test
   use:
-    - 1.自建机场
-    # - 2.回家节点
+    - 自建
+    - 机场1
+    # - 回家
 
 proxy-providers: #  此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围
-  1.自建机场:
+  自建:
     <<: *proxy-test
-    url: https://xxx.com/xxxxxxx
+    url: https://sub.xxx.com/xxxxx
 
-  # 2.回家节点:
+  机场1:
+    <<: *proxy-test
+    url: https://sub.xxxx.com/xxxxx
+
+  # 回家:
   #   <<: *proxy-test
-  #   url: https://xxx.com/xxxxxxxxx
+  #   url: https://xxx.com/xxxx
 
 ########################################## 嗅探模块 ##########################################
 sniffer:
@@ -311,7 +317,7 @@ proxy-groups:
   # - name: Home
   #   type: url-test
   #   use:
-  #     - 2.回家节点
+  #     - 回家
   #   icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png
 
   - name: 故障转移

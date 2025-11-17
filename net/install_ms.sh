@@ -15,7 +15,7 @@ echo "  请选择要安装的组件"
 echo "============================="
 echo "1) 安装 Mihomo"
 echo "2) 安装 SmartDNS"
-echo "3) 安装 ADGuardHome"  # 新增选项
+echo "3) 安装 ADGuardHome"
 echo "0) 退出脚本"
 echo "============================="
 read -p "请输入选项: " choice

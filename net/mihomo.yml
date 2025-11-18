@@ -374,6 +374,16 @@ proxy-groups:
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png
 
+  - name: PT
+    type: select
+    proxies:
+      - 节点选择
+      - 手动选择
+      - 直连
+      - 拒绝连接
+    <<: *all-proxys
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Round_Robin.png
+
   - name: 广告拦截
     type: select
     proxies:
@@ -430,7 +440,7 @@ rules:
   - GEOSITE,private,直连
   - GEOSITE,google-gemini,Gemini
   - RULE-SET,115,直连
-  - RULE-SET,PrivateTracker,直连
+  - RULE-SET,PrivateTracker,PT
   - RULE-SET,AWAvenue-Ads,广告拦截
   - DOMAIN-SUFFIX,iprofiles.apple.com,广告拦截
   - DOMAIN-SUFFIX,mdmenrollment.apple.com,广告拦截

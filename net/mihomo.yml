@@ -386,6 +386,7 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 手动选择
       - 直连
       - 拒绝连接
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png

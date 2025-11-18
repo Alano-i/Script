@@ -52,12 +52,14 @@ all-proxys: &all-proxys
   use:
     - 自建
     - 机场1
+    # - 机场2
 
 All: &All
   type: url-test
   use:
     - 自建
     - 机场1
+    # - 机场2
     # - 回家
 
 proxy-providers: #  此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围
@@ -66,6 +68,10 @@ proxy-providers: #  此函数位置请勿变动！此为模块更新时备份恢
     url: https://sub.xxxx.com/xxxx
 
   机场1:
+    <<: *proxy-test
+    url: https://sub.xxxx.com/xxxx
+    
+  机场2:
     <<: *proxy-test
     url: https://sub.xxxx.com/xxxx
 

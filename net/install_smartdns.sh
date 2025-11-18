@@ -30,17 +30,67 @@ esac
 
 echo
 
-# 更新软件包列表
-echo "1/5 更新软件源..."
-apt update
+# 安装 smartdns
+echo "1/2 安装 SmartDNS..."
+##########################
+# 默认 GitHub 仓库
+REPO="pymumu/smartdns"
+API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
-# 安装 smartdns（如果官方仓库已有包）
+# 获取系统架构
+ARCH="$(uname -m)"
+case "${ARCH}" in
+  x86_64) ARCH_TAG="x86_64-linux-all" ;;
+  aarch64|arm64) ARCH_TAG="arm64-linux-all" ;;
+  armv7l|armv7) ARCH_TAG="arm-linux-all" ;;
+  i386|i686) ARCH_TAG="i386-linux-all" ;;
+  *) echo "Unsupported architecture: ${ARCH}"; exit 1 ;;
+esac
 
-echo "2/5 安装 SmartDNS..."
-apt install -y smartdns
+echo "Detected architecture: ${ARCH} => tag part: ${ARCH_TAG}"
 
+# 获取最新版本信息
+echo "Fetching latest release info from GitHub..."
+JSON=$(curl -sSL "${API_URL}")
+
+LATEST_TAG=$(echo "$JSON" | grep -oP '"tag_name":\s*"\K(.*?)(?=")')
+if [ -z "$LATEST_TAG" ]; then
+  echo "Failed to get latest tag from GitHub API"; exit 1
+fi
+echo "Latest version tag: ${LATEST_TAG}"
+
+# 从 assets 列表中获取对应架构的 tar.gz 包名
+# 例如： smartdns.1.2025.11.09-1443.x86_64-linux-all.tar.gz
+FILE_NAME=$(echo "$JSON" | grep -oP '"name":\s*"\Ksmartdns\.[^"]*'"${ARCH_TAG}"'\.tar\.gz(?=")')
+if [ -z "$FILE_NAME" ]; then
+  echo "Failed to find asset for architecture tag ${ARCH_TAG}"; exit 1
+fi
+echo "Selected file: ${FILE_NAME}"
+
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${FILE_NAME}"
+
+echo "Downloading ${DOWNLOAD_URL} ..."
+curl -L -o "${FILE_NAME}" "${DOWNLOAD_URL}"
+
+echo "Extracting..."
+tar zxf "${FILE_NAME}"
+
+# echo "文件名：${FILE_NAME}"
+DIR_NAME="smartdns"
+echo "Change directory to ${DIR_NAME} 文件夹"
+cd "smartdns"
+
+echo "Making install script executable..."
+chmod +x ./install
+
+echo "开始安装 Smartdns ..."
+./install -U
+
+echo "Smartdns安装完成"
+
+##########################
 # 下载国内外域名列表
-echo "4/5 下载海外域名列表..."
+echo "2/2 下载海外域名列表..."
 DOMAINLIST_CONF_DIR="/etc/smartdns/domain-set"
 MAIN_CONF="/etc/smartdns/smartdns.conf"
 LOG_DIR="/etc/smartdns/log"
@@ -92,9 +142,7 @@ curl -sSf "${DOMESTIC_URL}" -o "${DOMESTIC_CONF}" || error_exit "下载国内域
 
 echo "国内外域名列表下载完成"
 
-# 启用开机启动并立即启动服务
-echo "5/5 设置开机启动并启动 SmartDNS..."
-systemctl enable smartdns
+# 启动服务
 systemctl restart smartdns
 
 echo

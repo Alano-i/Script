@@ -2,7 +2,7 @@
 ########################################## 全局设置 ##########################################
 mode: Rule
 port: 8080
-mixed-port: 6153
+mixed-port: 7890
 socks-port: 1080
 redir-port: 7892
 tproxy-port: 1536
@@ -63,11 +63,11 @@ All: &All
 proxy-providers: #  此函数位置请勿变动！此为模块更新时备份恢复订阅变量范围
   自建:
     <<: *proxy-test
-    url: https://sub.xxxxxxxxxx
+    url: https://sub.xxxx.com/xxxx
 
   机场1:
     <<: *proxy-test
-    url: https://sub.xxxxxxxxxx
+    url: https://sub.xxxx.com/xxxx
 
   # 回家:
   #   <<: *proxy-test
@@ -128,7 +128,7 @@ dns:
   # 路由器个人建议使用 redir-host 以最佳兼容性
   # 其他设备可以使用 fake-ip
   enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.0/16
+  fake-ip-range: 28.0.0.1/8
   fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - "*"
@@ -211,6 +211,10 @@ proxy-groups:
 
   - name: 手动选择
     type: select
+    proxies:
+      - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Domestic.png
 
@@ -218,6 +222,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Google_Search.png
 
@@ -225,6 +231,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/GitHub.png
 
@@ -232,6 +240,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
 
@@ -240,6 +250,7 @@ proxy-groups:
     proxies:
       - 直连
       - 节点选择
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
 
@@ -248,6 +259,7 @@ proxy-groups:
     proxies:
       - 直连
       - 节点选择
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/iCloud.png
 
@@ -255,6 +267,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
 
@@ -262,6 +276,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
 
@@ -269,6 +285,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
 
@@ -276,6 +294,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/TikTok.png
 
@@ -283,6 +303,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Twitter.png
 
@@ -290,13 +312,17 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
 
   - name: Microsoft
     type: select
     proxies:
+      - 直连
       - 节点选择
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png
 
@@ -304,6 +330,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/OneDrive.png
 
@@ -311,6 +339,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/AI.png
 
@@ -334,6 +364,8 @@ proxy-groups:
     type: select
     proxies:
       - 节点选择
+      - 直连
+      - 拒绝连接
     <<: *all-proxys
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Area.png
 
@@ -350,6 +382,7 @@ proxy-groups:
     proxies:
       - 节点选择
       - 直连
+      - 拒绝连接
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
 
   - {
@@ -390,7 +423,6 @@ rules:
   - GEOIP,private,直连,no-resolve
   - GEOSITE,private,直连
   - GEOSITE,google-gemini,Gemini
-  - GEOSITE,category-dev,节点选择
   - RULE-SET,115,直连
   - RULE-SET,PrivateTracker,直连
   - RULE-SET,AWAvenue-Ads,广告拦截
@@ -457,6 +489,7 @@ rules:
   - GEOSITE,apple-cn,Apple
   #  - GEOSITE,ehentai,ehentai
   - GEOSITE,github,GitHub
+  - GEOSITE,category-dev,节点选择
   - GEOSITE,twitter,Twitter
   - GEOSITE,youtube,YouTube
   - GEOSITE,google,Google

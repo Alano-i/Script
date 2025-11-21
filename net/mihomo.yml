@@ -71,9 +71,9 @@ proxy-providers: #  此函数位置请勿变动！此为模块更新时备份恢
     <<: *proxy-test
     url: https://sub.xxxx.com/xxxx
     
-  机场2:
-    <<: *proxy-test
-    url: https://sub.xxxx.com/xxxx
+  # 机场2:
+  #   <<: *proxy-test
+  #   url: https://sub.xxxx.com/xxxx
 
   # 回家:
   #   <<: *proxy-test

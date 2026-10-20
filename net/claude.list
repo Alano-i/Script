@@ -7,6 +7,9 @@ DOMAIN-SUFFIX,claudemcpclient.com
 DOMAIN-SUFFIX,claudemcpcontent.com
 DOMAIN-SUFFIX,claudeusercontent.com
 
+# MCP & Ecosystem
+DOMAIN-SUFFIX,modelcontextprotocol.io
+
 # CDN 和静态资源
 DOMAIN,servd-anthropic-website.b-cdn.net
 DOMAIN,anthropic.com.cdn.cloudflare.net
@@ -14,6 +17,13 @@ DOMAIN,anthropic.com.cdn.cloudflare.net
 # 认证 / 内容
 DOMAIN,anthropic.auth0.com
 DOMAIN,anthropic-com.ghost.io
+
+# Feature Flags & Telemetry
+DOMAIN,cdn.growthbook.io
+
+# Updates & Distribution
+DOMAIN,downloads.claude.ai
+DOMAIN,storage.googleapis.com
 
 # 监控和遥测
 DOMAIN-SUFFIX,sentry.io

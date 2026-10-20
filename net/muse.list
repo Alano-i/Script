@@ -1,0 +1,13 @@
+# --- Muse AI 核心与沙盒服务 ---
+- DOMAIN-SUFFIX,muse.ai
+- DOMAIN-SUFFIX,museai.com
+- DOMAIN-SUFFIX,meta.ai
+- DOMAIN-SUFFIX,metaaivm.com
+- DOMAIN-SUFFIX,metaaiusercontent.com
+# --- Meta 账户鉴权 ---
+- DOMAIN-SUFFIX,meta.com
+- DOMAIN-SUFFIX,atmeta.com
+# --- 移动端/桌面端 App 底层依赖 ---
+- DOMAIN-SUFFIX,facebook.com
+- DOMAIN-SUFFIX,facebook.net
+- DOMAIN-SUFFIX,fbcdn.net

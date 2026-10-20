@@ -13,6 +13,7 @@ DOMAIN-SUFFIX,modelcontextprotocol.io
 # CDN 和静态资源
 DOMAIN,servd-anthropic-website.b-cdn.net
 DOMAIN,anthropic.com.cdn.cloudflare.net
+DOMAIN,cdn.anthropic.com
 
 # 认证 / 内容
 DOMAIN,anthropic.auth0.com
